@@ -195,6 +195,7 @@ const DOMHandler = (function () {
       ? (winDisplay.textContent = 'You won!')
       : (winDisplay.textContent = 'You Lost!');
     const resetButton = document.createElement('button');
+    resetButton.classList.add('reset-button')
     resetButton.textContent = 'Reset';
     resetButton.addEventListener('click', resetGame);
     winDisplay.appendChild(resetButton);
