@@ -9,10 +9,9 @@ const DOMHandler = (function () {
 
   const createGrids = () => {
     const playerGrid = document.querySelector('.player-grid');
-    player.gameboard.array.forEach((col, colIndex) => {
-      const gridColumn = document.createElement('div');
-      gridColumn.classList.add('grid-column');
-      col.forEach((item, rowIndex) => {
+    playerGrid.innerHTML = ''; // Clear any previous content
+    player.gameboard.array.forEach((row, rowIndex) => {
+      row.forEach((item, colIndex) => {
         const gridItem = document.createElement('div');
         gridItem.classList.add('grid-item');
         gridItem.textContent = `${rowIndex} ${colIndex}`;
@@ -24,16 +23,14 @@ const DOMHandler = (function () {
           gridItem.style.backgroundColor = 'lightblue';
         }
         gridItem.style.border = '1px solid';
-        gridColumn.appendChild(gridItem);
+        playerGrid.appendChild(gridItem);
       });
-      playerGrid.appendChild(gridColumn);
     });
 
     const computerGrid = document.querySelector('.computer-grid');
-    computer.gameboard.array.forEach((col, colIndex) => {
-      const gridColumn = document.createElement('div');
-      gridColumn.classList.add('grid-column');
-      col.forEach((item, rowIndex) => {
+    computerGrid.innerHTML = '';
+    computer.gameboard.array.forEach((row, rowIndex) => {
+      row.forEach((item, colIndex) => {
         const gridItem = document.createElement('div');
         gridItem.classList.add('grid-item');
         gridItem.textContent = `${rowIndex} ${colIndex}`;
@@ -45,10 +42,48 @@ const DOMHandler = (function () {
           gridItem.style.backgroundColor = 'lightblue';
         }
         gridItem.style.border = '1px solid';
-        gridColumn.appendChild(gridItem);
+        computerGrid.appendChild(gridItem);
       });
-      computerGrid.appendChild(gridColumn);
     });
+
+    const computerGridItems = document.querySelectorAll(
+      '.computer-grid .grid-item'
+    );
+    computerGridItems.forEach((item) =>
+      item.addEventListener('click', playerTurn)
+    );
+  };
+
+  const computerTurn = () => {
+    const row = Math.floor(Math.random() * 10);
+    const col = Math.floor(Math.random() * 10);
+    const isHit = player.gameboard.receiveAttack(row, col);
+    console.log(isHit)
+    const playerGridItems = document.querySelectorAll(
+      '.player-grid .grid-item'
+    );
+    playerGridItems.forEach((item) => {
+      if (item.dataset.row == row && item.dataset.col == col) {
+        if (isHit) {
+          item.style.backgroundColor = 'red';
+        } else {
+          item.textContent = 'X';
+        }
+      }
+    });
+  };
+
+  const playerTurn = (e) => {
+    const square = e.target;
+    const row = square.dataset.row;
+    const col = square.dataset.col;
+    const isHit = computer.gameboard.receiveAttack(row, col);
+    if (isHit) {
+      square.style.backgroundColor = 'red';
+    } else {
+      square.textContent = 'X';
+    }
+    computerTurn();
   };
 
   return { createGrids };

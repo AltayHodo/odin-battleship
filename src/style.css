@@ -1,15 +1,21 @@
-main{
+main {
   display: flex;
   gap: 50px;
 }
 
-.player-grid, .computer-grid{
+.player-grid,
+.computer-grid {
   width: 400px;
   height: 400px;
   display: grid;
   grid-template-columns: repeat(10, 1fr);
+  grid-template-rows: repeat(10, 1fr);
 }
 
-.grid-column{
-  display: grid;
+.grid-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid;
+  background-color: lightblue;
 }
