@@ -48,11 +48,7 @@ const DOMHandler = (function () {
         gridItem.classList.add('grid-item');
         gridItem.dataset.row = rowIndex;
         gridItem.dataset.col = colIndex;
-        if (item) {
-          gridItem.style.backgroundColor = 'grey';
-        } else {
-          gridItem.style.backgroundColor = 'lightblue';
-        }
+        gridItem.style.backgroundColor = 'lightblue';
         gridItem.style.border = '1px solid';
         computerGrid.appendChild(gridItem);
       });
@@ -65,7 +61,7 @@ const DOMHandler = (function () {
       item.addEventListener('click', playerTurn)
     );
 
-    updatePhaseText(); // Update the phase text
+    updatePhaseText();
   };
 
   const updateDirection = (e) => {
@@ -115,6 +111,25 @@ const DOMHandler = (function () {
     }
   };
 
+  const highlightSunkShip = (ship, gridClass) => {
+    const gridItems = document.querySelectorAll(`.${gridClass} .grid-item`);
+    gridItems.forEach((item) => {
+      const row = parseInt(item.dataset.row);
+      const col = parseInt(item.dataset.col);
+      if (
+        gridClass === 'computer-grid' &&
+        computer.gameboard.array[row][col] === ship
+      ) {
+        item.style.border = '3px solid darkred';
+      } else if (
+        gridClass === 'player-grid' &&
+        player.gameboard.array[row][col] === ship
+      ) {
+        item.style.border = '3px solid darkred';
+      }
+    });
+  };
+
   const computerTurn = () => {
     let row = Math.floor(Math.random() * 10);
     let col = Math.floor(Math.random() * 10);
@@ -135,13 +150,20 @@ const DOMHandler = (function () {
         }
       }
     });
+
+    player.gameboard.ships.forEach((ship) => {
+      if (ship.isSunk()) {
+        highlightSunkShip(ship, 'player-grid');
+      }
+    });
+
     if (player.gameboard.isAllShipsSunk()) {
       endGame(false);
     }
   };
 
   const playerTurn = (e) => {
-    if (placingShips) return; // Prevent attacks during ship placement
+    if (placingShips) return;
     const square = e.target;
     const row = square.dataset.row;
     const col = square.dataset.col;
@@ -154,6 +176,13 @@ const DOMHandler = (function () {
     } else {
       square.textContent = 'X';
     }
+
+    computer.gameboard.ships.forEach((ship) => {
+      if (ship.isSunk()) {
+        highlightSunkShip(ship, 'computer-grid');
+      }
+    });
+
     if (computer.gameboard.isAllShipsSunk()) {
       endGame(true);
     }
