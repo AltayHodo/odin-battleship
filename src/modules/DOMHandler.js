@@ -3,9 +3,20 @@ import Gameboard from './gameboard';
 
 const DOMHandler = (function () {
   let player = new Player('player');
-  player.gameboard.placeShips();
   let computer = new Player('computer');
-  computer.gameboard.placeShips();
+  let currentShipLength = 5;
+  let currentDirection = 'horizontal';
+  let placingShips = true;
+  const orientationContainer = document.querySelector('.orientation-container');
+
+  const updatePhaseText = () => {
+    const phaseText = document.querySelector('.phase-text');
+    if (placingShips) {
+      phaseText.textContent = `Placing ships: Place a ship of length ${currentShipLength}`;
+    } else {
+      phaseText.textContent = 'Playing the game: Attack the enemy grid!';
+    }
+  };
 
   const createGrids = () => {
     const playerGrid = document.querySelector('.player-grid');
@@ -14,7 +25,6 @@ const DOMHandler = (function () {
       row.forEach((item, colIndex) => {
         const gridItem = document.createElement('div');
         gridItem.classList.add('grid-item');
-        gridItem.textContent = `${rowIndex} ${colIndex}`;
         gridItem.dataset.row = rowIndex;
         gridItem.dataset.col = colIndex;
         if (item) {
@@ -23,6 +33,9 @@ const DOMHandler = (function () {
           gridItem.style.backgroundColor = 'lightblue';
         }
         gridItem.style.border = '1px solid';
+        if (placingShips) {
+          gridItem.addEventListener('click', handlePlaceShip);
+        }
         playerGrid.appendChild(gridItem);
       });
     });
@@ -33,7 +46,6 @@ const DOMHandler = (function () {
       row.forEach((item, colIndex) => {
         const gridItem = document.createElement('div');
         gridItem.classList.add('grid-item');
-        gridItem.textContent = `${rowIndex} ${colIndex}`;
         gridItem.dataset.row = rowIndex;
         gridItem.dataset.col = colIndex;
         if (item) {
@@ -52,6 +64,55 @@ const DOMHandler = (function () {
     computerGridItems.forEach((item) =>
       item.addEventListener('click', playerTurn)
     );
+
+    updatePhaseText(); // Update the phase text
+  };
+
+  const updateDirection = (e) => {
+    currentDirection = e.target.value;
+  };
+
+  const radioButtons = document.querySelectorAll('input[type="radio"]');
+  radioButtons.forEach((button) =>
+    button.addEventListener('click', updateDirection)
+  );
+
+  const handlePlaceShip = (e) => {
+    const row = parseInt(e.target.dataset.row);
+    const col = parseInt(e.target.dataset.col);
+    if (
+      player.gameboard.canPlaceShip(
+        currentShipLength,
+        row,
+        col,
+        currentDirection
+      )
+    ) {
+      player.gameboard.placeShip(currentShipLength, row, col, currentDirection);
+      switch (currentShipLength) {
+        case 5:
+          currentShipLength = 4;
+          break;
+        case 4:
+          currentShipLength = 3;
+          break;
+        case 3:
+          currentShipLength = 2;
+          break;
+        case 2:
+          currentShipLength = 1;
+          break;
+        case 1:
+          placingShips = false;
+          computer.gameboard.randomPlaceShips();
+          orientationContainer.style.display = 'none';
+          createGrids();
+          break;
+      }
+      createGrids();
+    } else {
+      alert('Cannot place ship here. Try a different location or direction.');
+    }
   };
 
   const computerTurn = () => {
@@ -80,6 +141,7 @@ const DOMHandler = (function () {
   };
 
   const playerTurn = (e) => {
+    if (placingShips) return; // Prevent attacks during ship placement
     const square = e.target;
     const row = square.dataset.row;
     const col = square.dataset.col;
@@ -110,14 +172,18 @@ const DOMHandler = (function () {
     const computerGridItems = document.querySelectorAll(
       '.computer-grid .grid-item'
     );
-    computerGridItems.forEach((item) => item.removeEventListener('click', playerTurn));
+    computerGridItems.forEach((item) =>
+      item.removeEventListener('click', playerTurn)
+    );
   };
 
   const resetGame = () => {
     player = new Player('player');
-    player.gameboard.placeShips();
     computer = new Player('computer');
-    computer.gameboard.placeShips();
+    currentShipLength = 5;
+    currentDirection = 'horizontal';
+    placingShips = true;
+    orientationContainer.style.display = 'block';
     createGrids();
     const winDisplay = document.querySelector('.win-display');
     winDisplay.innerHTML = '';

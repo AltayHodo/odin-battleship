@@ -6,7 +6,7 @@ class Gameboard {
     this.attacks = new Set();
     this.ships = [];
   }
-  //one 5 ship, one 4 ship, 2 three ships, 2 two ships, one 1 ship
+
   placeShip(length, startX, startY, direction) {
     const ship = new Ship(length);
     this.ships.push(ship);
@@ -21,9 +21,39 @@ class Gameboard {
     }
   }
 
-  placeShips() {
-    this.placeShip(5, 0, 0, 'horizontal');
-    this.placeShip(3, 2, 2, 'vertical');
+  canPlaceShip(length, startX, startY, direction) {
+    if (direction === 'horizontal') {
+      for (let i = 0; i < length; i++) {
+        if (startY + i >= 10 || this.array[startX][startY + i]) {
+          return false;
+        }
+      }
+    } else if (direction === 'vertical') {
+      for (let i = 0; i < length; i++) {
+        if (startX + i >= 10 || this.array[startX + i][startY]) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  randomPlaceShip(length) {
+    const direction = Math.random() < 0.5 ? 'horizontal' : 'vertical';
+    let placed = false;
+    while (!placed) {
+      const startX = Math.floor(Math.random() * 10);
+      const startY = Math.floor(Math.random() * 10);
+      if (this.canPlaceShip(length, startX, startY, direction)) {
+        this.placeShip(length, startX, startY, direction);
+        placed = true;
+      }
+    }
+  }
+
+  randomPlaceShips() {
+    const shipLengths = [5, 4, 3, 3, 2, 2, 1];
+    shipLengths.forEach((length) => this.randomPlaceShip(length));
   }
 
   receiveAttack(row, col) {
