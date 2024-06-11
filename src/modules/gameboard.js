@@ -3,7 +3,7 @@ import Ship from './ship';
 class Gameboard {
   constructor() {
     this.array = Array.from({ length: 10 }, () => Array(10).fill(null));
-    this.attacks = [];
+    this.attacks = new Set();
     this.ships = [];
   }
   //one 5 ship, one 4 ship, 2 three ships, 2 two ships, one 1 ship
@@ -27,13 +27,16 @@ class Gameboard {
   }
 
   receiveAttack(row, col) {
+    const attackKey = `${row},${col}`;
+    if (this.attacks.has(attackKey)) {
+      return null;
+    }
+    this.attacks.add(attackKey);
     if (this.array[row][col]) {
       const ship = this.array[row][col];
       ship.hit();
-      this.attacks.push([row, col]);
       return true;
     } else {
-      this.attacks.push([row, col]);
       return false;
     }
   }
