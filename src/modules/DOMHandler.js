@@ -55,8 +55,12 @@ const DOMHandler = (function () {
   };
 
   const computerTurn = () => {
-    const row = Math.floor(Math.random() * 10);
-    const col = Math.floor(Math.random() * 10);
+    let row = Math.floor(Math.random() * 10);
+    let col = Math.floor(Math.random() * 10);
+    while (computer.gameboard.attacks.has(`${row},${col}`)) {
+      row = Math.floor(Math.random() * 10);
+      col = Math.floor(Math.random() * 10);
+    }
     const isHit = player.gameboard.receiveAttack(row, col);
     const playerGridItems = document.querySelectorAll(
       '.player-grid .grid-item'
@@ -77,7 +81,7 @@ const DOMHandler = (function () {
     const row = square.dataset.row;
     const col = square.dataset.col;
     const isHit = computer.gameboard.receiveAttack(row, col);
-    if(isHit === null){
+    if (isHit === null) {
       return;
     }
     if (isHit) {
